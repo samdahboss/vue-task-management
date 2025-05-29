@@ -1,15 +1,16 @@
 <template>
-    <div >
-<div>hhhhhhhhhhhhhhhhhhh</div>
+    <div>
+        <v-btn append-icon="$vuetify">
+            Button
+        </v-btn>
     </div>
 </template>
 
 <script>
-    export default {
-        
+export default {
+    components: {
     }
+}
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>
