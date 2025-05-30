@@ -15,7 +15,7 @@ export const useAuthStore = defineStore("auth", {
           (u) => u.email === userData.email && u.password === userData.password
         );
         if (!user) {
-          throw new Error("Login failed");
+          throw new Error("Invalid email or password");
         }
         
         this.isAuthenticated = true;
