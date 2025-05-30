@@ -4,9 +4,9 @@ import userService from "@/services/userService";
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     isAuthenticated: false,
-    user: null
+    user: null,
   }),
-  
+
   actions: {
     async login(userData) {
       try {
@@ -17,10 +17,12 @@ export const useAuthStore = defineStore("auth", {
         if (!user) {
           throw new Error("Invalid email or password");
         }
-        
+
         this.isAuthenticated = true;
         this.user = user;
-        
+        // Store the user in localStorage for session persistence
+        localStorage.setItem("auth-token", JSON.stringify(user.email));
+
         return user;
       } catch (error) {
         console.error(error);
@@ -33,17 +35,24 @@ export const useAuthStore = defineStore("auth", {
         const newUser = await userService.createUser(userData);
         this.isAuthenticated = true;
         this.user = newUser;
-        
+
+        // Store the user in localStorage for session persistence
+        localStorage.setItem("auth-token", JSON.stringify(user.email));
+
         return newUser;
       } catch (error) {
         console.error(error.message);
         throw error;
       }
     },
-    
+
+    restoreSession() {
+      this.isAuthenticated = true;
+    },
+
     logout() {
       this.isAuthenticated = false;
       this.user = null;
-    }
+    },
   },
 });

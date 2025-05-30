@@ -11,25 +11,27 @@ const router = createRouter({
     {
       path: "/",
       name: "landing",
-      component: LandingPage
+      component: LandingPage,
     },
     {
       path: "/login",
       name: "login",
-      component: LoginView
+      component: LoginView,
+      meta: { requiresGuest: true },
     },
     {
       path: "/register",
       name: "register",
-      component: RegisterView
+      component: RegisterView,
+      meta: { requiresGuest: true },
     },
     {
       path: "/dashboard",
       name: "dashboard",
       component: DashboardView,
-      meta: { requiresAuth: true }
-    }
-  ]
+      meta: { requiresAuth: true },
+    },
+  ],
 });
 
 // Navigation guard
@@ -37,9 +39,21 @@ const router = createRouter({
 //I need to authenticate before showing the dashboard route to any user
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
+
+  // Check localStorage first, then update store if needed
+  const token = localStorage.getItem('auth-token');
+  const isAuthenticated = token ? true : authStore.isAuthenticated;
   
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/login');
+  // If token exists but store isn't authenticated, restore the session
+  if (token && !authStore.isAuthenticated) {
+    authStore.restoreSession();
+  }
+
+  // Check the route meta for authentication requirements
+  if (to.meta.requiresGuest && isAuthenticated) {
+    next("/dashboard");
+  } else if (to.meta.requiresAuth && !isAuthenticated) {
+    next("/login");
   } else {
     next();
   }
