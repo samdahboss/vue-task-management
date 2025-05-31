@@ -13,10 +13,9 @@ export default {
     const response = await fetch(`${API_URL}/tasks?userId=${userId}`);
     return response.json();
   },
-
   // Fetch a single task by ID
   async getTaskById(taskId) {
-    const response = await fetch(`${API_URL}/tasks?id=${taskId}`);
+    const response = await fetch(`${API_URL}/tasks/${taskId}`);
     if (!response.ok) {
       throw new Error(
         `Error fetching task with ID ${taskId}: ${response.statusText}`
@@ -36,10 +35,9 @@ export default {
     });
     return response.json();
   },
-
   //Update a Specific Task by ID
   async updateTask(taskId, task) {
-    const response = await fetch(`${API_URL}/tasks?id=${taskId}`, {
+    const response = await fetch(`${API_URL}/tasks/${taskId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -56,7 +54,7 @@ export default {
 
   //Delete a Specific Task by ID
   async deleteTask(taskId) {
-    const response = await fetch(`${API_URL}/tasks?id=${taskId}`, {
+    const response = await fetch(`${API_URL}/tasks/${taskId}`, {
       method: "DELETE",
     });
     if (!response.ok) {

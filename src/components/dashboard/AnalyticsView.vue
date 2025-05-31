@@ -14,29 +14,19 @@
       <v-card-title class="pb-0">Task Distribution</v-card-title>
       <v-card-text>
         <div class="d-flex flex-column align-center">
-          <v-sheet class="ma-2 pa-2" width="300" height="300" style="position: relative">
-            <div class="chart-container">
-              <!-- Placeholder for the chart -->
-              <div class="pie-chart">
-                <div 
-                  v-for="(segment, index) in chartSegments" 
-                  :key="index"
-                  class="pie-segment"
-                  :style="{ 
-                    '--value': segment.percentage, 
-                    '--start': segment.start,
-                    '--color': segment.color
-                  }"
-                ></div>
-                <div class="pie-center">
-                  <span class="text-h4">{{ totalTasks }}</span>
-                  <span class="text-caption">Total Tasks</span>
-                </div>
-              </div>
+          <div style="position: relative; height: 300px; width: 300px">
+            <Pie
+              v-if="totalTasks > 0"
+              :data="chartData"
+              :options="chartOptions"
+            />
+            <div v-else class="d-flex justify-center align-center" style="height: 300px">
+              <v-icon size="64" color="grey-lighten-1">mdi-clipboard-text</v-icon>
+              <p class="text-h6 text-grey ml-4">No tasks available</p>
             </div>
-          </v-sheet>
+          </div>
 
-          <div class="d-flex flex-wrap justify-center">
+          <div class="d-flex flex-wrap justify-center mt-4">
             <div
               v-for="(item, index) in chartLegend"
               :key="index"
@@ -48,32 +38,59 @@
           </div>
         </div>
       </v-card-text>
-    </v-card>
-
-    <!-- Progress Timeline -->
-    <v-card class="mb-6">
-      <v-card-title class="pb-0">Task Completion Timeline</v-card-title>
-      <v-card-text>
-        <v-timeline>
-          <v-timeline-item
-            v-for="(task, i) in recentlyCompletedTasks"
-            :key="i"
-            :dot-color="getTimelineColor(i)"
-            size="small"
-          >
-            <template v-slot:opposite>
-              <div class="text-caption">{{ formatDate(task.dueDate) }}</div>
-            </template>
-            <div>
-              <div class="text-body-2 font-weight-bold mb-1">{{ task.title }}</div>
-              <div class="text-caption text-grey">{{ task.description }}</div>
+    </v-card>    <!-- Task Completion Timeline -->
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-card class="mb-6" height="100%">
+          <v-card-title class="pb-0">Task Completion Timeline</v-card-title>
+          <v-card-text>
+            <div v-if="recentlyCompletedTasks.length > 0">
+              <v-timeline>
+                <v-timeline-item
+                  v-for="(task, i) in recentlyCompletedTasks"
+                  :key="i"
+                  :dot-color="getTimelineColor(i)"
+                  size="small"
+                >
+                  <template v-slot:opposite>
+                    <div class="text-caption">{{ formatDate(task.dueDate) }}</div>
+                  </template>
+                  <div>
+                    <div class="text-body-2 font-weight-bold mb-1">{{ task.title }}</div>
+                    <div class="text-caption text-grey">{{ task.description }}</div>
+                  </div>
+                </v-timeline-item>
+              </v-timeline>
             </div>
-          </v-timeline-item>
-        </v-timeline>
-      </v-card-text>
-    </v-card>
+            <div v-else class="d-flex justify-center align-center" style="height: 200px">
+              <v-icon size="40" color="grey-lighten-1">mdi-check-circle-outline</v-icon>
+              <p class="text-body-1 text-grey ml-4">No completed tasks yet</p>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      
+      <v-col cols="12" md="6">
+        <v-card class="mb-6" height="100%">
+          <v-card-title class="pb-0">Task Completion Trend</v-card-title>
+          <v-card-text>
+            <div style="position: relative; height: 250px;">
+              <Line 
+                v-if="completionTrendData.datasets[0].data.length > 0"
+                :data="completionTrendData" 
+                :options="lineChartOptions" 
+              />
+              <div v-else class="d-flex justify-center align-center" style="height: 200px">
+                <v-icon size="40" color="grey-lighten-1">mdi-chart-line</v-icon>
+                <p class="text-body-1 text-grey ml-4">No data available for trend analysis</p>
+              </div>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
 
-    <!-- Task Priority Distribution -->
+    <!-- Task Status Cards -->
     <v-card>
       <v-card-title class="pb-0">Task Status</v-card-title>
       <v-card-text>
@@ -90,7 +107,7 @@
                 <div class="text-h5 mb-2">{{ stat.value }}</div>
                 <div class="text-body-2">{{ stat.label }}</div>
                 <v-progress-linear
-                  :value="(stat.value / totalTasks) * 100"
+                  :value="totalTasks > 0 ? (stat.value / totalTasks) * 100 : 0"
                   height="4"
                   color="white"
                   class="mt-2"
@@ -105,8 +122,17 @@
 </template>
 
 <script>
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
+import { Pie, Line } from 'vue-chartjs';
+
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title);
+
 export default {
   name: "AnalyticsView",
+  components: {
+    Pie,
+    Line
+  },
   props: {
     tasks: {
       type: Array,
@@ -136,8 +162,7 @@ export default {
       return this.tasks.filter(task => 
         task.dueDate === today && !task.completed
       ).length;
-    },
-    taskStats() {
+    },    taskStats() {
       return [
         { label: "Completed", value: this.completedTasks, color: "green" },
         { label: "Pending", value: this.pendingTasks, color: "blue" },
@@ -145,43 +170,43 @@ export default {
         { label: "Due Today", value: this.todayTasks, color: "orange" }
       ];
     },
-    chartSegments() {
-      let currentStart = 0;
-      const segments = [];
-      
-      if (this.totalTasks === 0) {
-        return [{ percentage: 100, start: 0, color: 'grey' }];
-      }
-      
-      // Completed
-      if (this.completedTasks > 0) {
-        const percentage = (this.completedTasks / this.totalTasks) * 100;
-        segments.push({ percentage, start: currentStart, color: 'green' });
-        currentStart += percentage;
-      }
-      
-      // Overdue
-      if (this.overdueTasks > 0) {
-        const percentage = (this.overdueTasks / this.totalTasks) * 100;
-        segments.push({ percentage, start: currentStart, color: 'red' });
-        currentStart += percentage;
-      }
-      
-      // Due Today
-      if (this.todayTasks > 0) {
-        const percentage = (this.todayTasks / this.totalTasks) * 100;
-        segments.push({ percentage, start: currentStart, color: 'orange' });
-        currentStart += percentage;
-      }
-      
-      // Remaining pending
-      const remainingPending = this.pendingTasks - this.overdueTasks - this.todayTasks;
-      if (remainingPending > 0) {
-        const percentage = (remainingPending / this.totalTasks) * 100;
-        segments.push({ percentage, start: currentStart, color: 'blue' });
-      }
-      
-      return segments;
+    chartData() {
+      return {
+        labels: ['Completed', 'Overdue', 'Due Today', 'Upcoming'],
+        datasets: [
+          {
+            backgroundColor: ['#4CAF50', '#F44336', '#FF9800', '#2196F3'],
+            data: [
+              this.completedTasks,
+              this.overdueTasks,
+              this.todayTasks,
+              this.pendingTasks - this.overdueTasks - this.todayTasks
+            ]
+          }
+        ]
+      };
+    },
+    chartOptions() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.formattedValue || '';
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = Math.round((context.raw / total) * 100);
+                return `${label}: ${value} (${percentage}%)`;
+              }
+            }
+          }
+        }
+      };
     },
     chartLegend() {
       return [
@@ -190,6 +215,61 @@ export default {
         { label: "Due Today", value: this.todayTasks, color: "orange" },
         { label: "Upcoming", value: this.pendingTasks - this.overdueTasks - this.todayTasks, color: "blue" }
       ];
+    },
+    completionTrendData() {
+      // Group tasks by month/year and count completed ones
+      const completedTasksByDate = {};
+      
+      // Get last 6 months
+      const dates = [];
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        dates.push(yearMonth);
+        completedTasksByDate[yearMonth] = 0;
+      }
+      
+      // Count completed tasks by month
+      this.tasks.forEach(task => {
+        if (task.completed) {
+          const taskDate = new Date(task.dueDate);
+          const yearMonth = `${taskDate.getFullYear()}-${String(taskDate.getMonth() + 1).padStart(2, '0')}`;
+          if (completedTasksByDate[yearMonth] !== undefined) {
+            completedTasksByDate[yearMonth]++;
+          }
+        }
+      });
+      
+      return {
+        labels: dates.map(date => {
+          const [year, month] = date.split('-');
+          return new Date(year, month - 1).toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+        }),
+        datasets: [
+          {
+            label: 'Completed Tasks',
+            backgroundColor: 'rgba(76, 175, 80, 0.2)',
+            borderColor: '#4CAF50',
+            data: dates.map(date => completedTasksByDate[date]),
+            tension: 0.4
+          }
+        ]
+      };
+    },
+    lineChartOptions() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            }
+          }
+        }
+      };
     },
     recentlyCompletedTasks() {
       return [...this.tasks]
@@ -213,48 +293,8 @@ export default {
 
 <style scoped>
 .chart-container {
-  width: 100%;
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.pie-chart {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.pie-segment {
-  --a: calc(var(--start) * 3.6deg);
-  --b: calc((var(--start) + var(--value)) * 3.6deg);
-  
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  transform: rotate(var(--a));
-  background: conic-gradient(
-    var(--color) calc(var(--value) * 3.6deg),
-    transparent 0
-  );
-}
-
-.pie-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 120px;
-  height: 120px;
-  background: white;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 </style>
