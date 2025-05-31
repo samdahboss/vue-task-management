@@ -15,11 +15,7 @@
       <v-card-text>
         <div class="d-flex flex-column align-center">
           <div style="position: relative; height: 300px; width: 300px">
-            <Pie
-              v-if="totalTasks > 0"
-              :data="chartData"
-              :options="chartOptions"
-            />
+            <Pie v-if="totalTasks > 0" :data="chartData" :options="chartOptions" />
             <div v-else class="d-flex justify-center align-center" style="height: 300px">
               <v-icon size="64" color="grey-lighten-1">mdi-clipboard-text</v-icon>
               <p class="text-h6 text-grey ml-4">No tasks available</p>
@@ -38,7 +34,8 @@
           </div>
         </div>
       </v-card-text>
-    </v-card>    <!-- Task Completion Timeline -->
+    </v-card>
+    <!-- Task Completion Timeline -->
     <v-row>
       <v-col cols="12" md="6">
         <v-card class="mb-6" height="100%">
@@ -69,121 +66,117 @@
           </v-card-text>
         </v-card>
       </v-col>
-      
+
       <v-col cols="12" md="6">
         <v-card class="mb-6" height="100%">
           <v-card-title class="pb-0">Task Completion Trend</v-card-title>
           <v-card-text>
-            <div style="position: relative; height: 250px;">
-              <Line 
+            <div style="position: relative; height: 250px">
+              <Line
                 v-if="completionTrendData.datasets[0].data.length > 0"
-                :data="completionTrendData" 
-                :options="lineChartOptions" 
+                :data="completionTrendData"
+                :options="lineChartOptions"
               />
-              <div v-else class="d-flex justify-center align-center" style="height: 200px">
+              <div
+                v-else
+                class="d-flex justify-center align-center"
+                style="height: 200px"
+              >
                 <v-icon size="40" color="grey-lighten-1">mdi-chart-line</v-icon>
-                <p class="text-body-1 text-grey ml-4">No data available for trend analysis</p>
+                <p class="text-body-1 text-grey ml-4">
+                  No data available for trend analysis
+                </p>
               </div>
             </div>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
-
-    <!-- Task Status Cards -->
-    <v-card>
-      <v-card-title class="pb-0">Task Status</v-card-title>
-      <v-card-text>
-        <v-row>
-          <v-col 
-            v-for="(stat, index) in taskStats" 
-            :key="index" 
-            cols="12" 
-            sm="6" 
-            md="3"
-          >
-            <v-card :color="stat.color" dark flat>
-              <v-card-text>
-                <div class="text-h5 mb-2">{{ stat.value }}</div>
-                <div class="text-body-2">{{ stat.label }}</div>
-                <v-progress-linear
-                  :value="totalTasks > 0 ? (stat.value / totalTasks) * 100 : 0"
-                  height="4"
-                  color="white"
-                  class="mt-2"
-                ></v-progress-linear>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-card-text>
-    </v-card>
   </div>
 </template>
 
 <script>
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
-import { Pie, Line } from 'vue-chartjs';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+} from "chart.js";
+import { Pie, Line } from "vue-chartjs";
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title);
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title
+);
 
 export default {
   name: "AnalyticsView",
   components: {
     Pie,
-    Line
+    Line,
   },
   props: {
     tasks: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     totalTasks() {
       return this.tasks.length;
     },
     completedTasks() {
-      return this.tasks.filter(task => task.completed).length;
+      return this.tasks.filter((task) => task.completed).length;
     },
     pendingTasks() {
-      return this.tasks.filter(task => !task.completed).length;
+      return this.tasks.filter((task) => !task.completed).length;
     },
     overdueTasks() {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      return this.tasks.filter(task => {
+      return this.tasks.filter((task) => {
         const dueDate = new Date(task.dueDate);
         return !task.completed && dueDate < today;
       }).length;
     },
     todayTasks() {
-      const today = new Date().toISOString().split('T')[0];
-      return this.tasks.filter(task => 
-        task.dueDate === today && !task.completed
-      ).length;
-    },    taskStats() {
+      const today = new Date().toISOString().split("T")[0];
+      return this.tasks.filter((task) => task.dueDate === today && !task.completed)
+        .length;
+    },
+    taskStats() {
       return [
         { label: "Completed", value: this.completedTasks, color: "green" },
         { label: "Pending", value: this.pendingTasks, color: "blue" },
         { label: "Overdue", value: this.overdueTasks, color: "red" },
-        { label: "Due Today", value: this.todayTasks, color: "orange" }
+        { label: "Due Today", value: this.todayTasks, color: "orange" },
       ];
     },
     chartData() {
       return {
-        labels: ['Completed', 'Overdue', 'Due Today', 'Upcoming'],
+        labels: ["Completed", "Overdue", "Due Today", "Upcoming"],
         datasets: [
           {
-            backgroundColor: ['#4CAF50', '#F44336', '#FF9800', '#2196F3'],
+            backgroundColor: ["#4CAF50", "#F44336", "#FF9800", "#2196F3"],
             data: [
               this.completedTasks,
               this.overdueTasks,
               this.todayTasks,
-              this.pendingTasks - this.overdueTasks - this.todayTasks
-            ]
-          }
-        ]
+              this.pendingTasks - this.overdueTasks - this.todayTasks,
+            ],
+          },
+        ],
       };
     },
     chartOptions() {
@@ -192,20 +185,20 @@ export default {
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            display: false
+            display: false,
           },
           tooltip: {
             callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.formattedValue || '';
+              label: function (context) {
+                const label = context.label || "";
+                const value = context.formattedValue || "";
                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                 const percentage = Math.round((context.raw / total) * 100);
                 return `${label}: ${value} (${percentage}%)`;
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       };
     },
     chartLegend() {
@@ -213,48 +206,60 @@ export default {
         { label: "Completed", value: this.completedTasks, color: "green" },
         { label: "Overdue", value: this.overdueTasks, color: "red" },
         { label: "Due Today", value: this.todayTasks, color: "orange" },
-        { label: "Upcoming", value: this.pendingTasks - this.overdueTasks - this.todayTasks, color: "blue" }
+        {
+          label: "Upcoming",
+          value: this.pendingTasks - this.overdueTasks - this.todayTasks,
+          color: "blue",
+        },
       ];
     },
     completionTrendData() {
       // Group tasks by month/year and count completed ones
       const completedTasksByDate = {};
-      
+
       // Get last 6 months
       const dates = [];
       for (let i = 5; i >= 0; i--) {
         const date = new Date();
         date.setMonth(date.getMonth() - i);
-        const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}`;
         dates.push(yearMonth);
         completedTasksByDate[yearMonth] = 0;
       }
-      
+
       // Count completed tasks by month
-      this.tasks.forEach(task => {
+      this.tasks.forEach((task) => {
         if (task.completed) {
           const taskDate = new Date(task.dueDate);
-          const yearMonth = `${taskDate.getFullYear()}-${String(taskDate.getMonth() + 1).padStart(2, '0')}`;
+          const yearMonth = `${taskDate.getFullYear()}-${String(
+            taskDate.getMonth() + 1
+          ).padStart(2, "0")}`;
           if (completedTasksByDate[yearMonth] !== undefined) {
             completedTasksByDate[yearMonth]++;
           }
         }
       });
-      
+
       return {
-        labels: dates.map(date => {
-          const [year, month] = date.split('-');
-          return new Date(year, month - 1).toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+        labels: dates.map((date) => {
+          const [year, month] = date.split("-");
+          return new Date(year, month - 1).toLocaleDateString(undefined, {
+            month: "short",
+            year: "numeric",
+          });
         }),
         datasets: [
           {
-            label: 'Completed Tasks',
-            backgroundColor: 'rgba(76, 175, 80, 0.2)',
-            borderColor: '#4CAF50',
-            data: dates.map(date => completedTasksByDate[date]),
-            tension: 0.4
-          }
-        ]
+            label: "Completed Tasks",
+            backgroundColor: "rgba(76, 175, 80, 0.2)",
+            borderColor: "#4CAF50",
+            data: dates.map((date) => completedTasksByDate[date]),
+            tension: 0.4,
+          },
+        ],
       };
     },
     lineChartOptions() {
@@ -265,29 +270,35 @@ export default {
           y: {
             beginAtZero: true,
             ticks: {
-              stepSize: 1
-            }
-          }
-        }
+              stepSize: 1,
+            },
+          },
+        },
       };
     },
     recentlyCompletedTasks() {
       return [...this.tasks]
-        .filter(task => task.completed)
+        .filter((task) => task.completed)
         .sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
         .slice(0, 5);
-    }
+    },
   },
   methods: {
     formatDate(dateString) {
-      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      const options = { year: "numeric", month: "short", day: "numeric" };
       return new Date(dateString).toLocaleDateString(undefined, options);
     },
     getTimelineColor(index) {
-      const colors = ['green', 'green-darken-1', 'green-darken-2', 'green-darken-3', 'green-darken-4'];
+      const colors = [
+        "green",
+        "green-darken-1",
+        "green-darken-2",
+        "green-darken-3",
+        "green-darken-4",
+      ];
       return colors[index % colors.length];
-    }
-  }
+    },
+  },
 };
 </script>
 

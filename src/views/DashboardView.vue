@@ -84,11 +84,9 @@ export default {
     TasksView,
     TaskDialog,
     AnalyticsView,
-  },
-  data() {
+  },  data() {
     return {
       mainTab: "tasks",
-      loading: true,
       taskDialog: false,
       editMode: false,
       editedTask: {
@@ -106,6 +104,10 @@ export default {
 
     tasks() {
       return this.taskStore.tasks;
+    },
+    
+    loading() {
+      return this.taskStore.isLoading;
     },
 
     stats() {
@@ -130,29 +132,23 @@ export default {
     taskStore() {
       return useTaskStore();
     },
-  },
-  methods: {
+  },  methods: {
     async fetchTasks() {
       if (!this.user) {
         console.log("No user found, cannot fetch tasks");
-        this.loading = false;
         return;
       }
 
       console.log("Fetching tasks for user:", this.user);
-      this.loading = true;
       try {
         // Use the task store to fetch tasks
         await this.taskStore.fetchTasksByUserId(this.user.id);
       } catch (error) {
         console.error("Error fetching tasks:", error);
-      } finally {
-        this.loading = false;
       }
     },
 
     async restoreSession() {
-      this.loading = true;
       try {
         await this.authStore.restoreSession();
 
@@ -162,8 +158,6 @@ export default {
         }
       } catch (error) {
         console.error("Error restoring session:", error);
-      } finally {
-        this.loading = false;
       }
     },
 
