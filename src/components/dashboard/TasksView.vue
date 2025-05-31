@@ -22,15 +22,18 @@
         ></v-text-field>
       </v-col>
     </v-row>
-
     <!-- Task List -->
     <task-list
-      :tasks="filteredTasks"
+      :tasks="paginatedTasks"
       :loading="loading"
+      :total-items="filteredTasks.length"
+      :current-page="currentPage"
+      :total-pages="totalPages"
       @toggle-completion="$emit('toggle-completion', $event)"
       @edit="$emit('edit', $event)"
       @delete="$emit('delete', $event)"
       @new-task="$emit('new-task')"
+      @change-page="changePage"
     />
   </v-container>
 </template>
@@ -58,6 +61,8 @@ export default {
     return {
       activeTab: "all",
       search: "",
+      currentPage: 1,
+      itemsPerPage: 6,
     };
   },
   computed: {
@@ -102,6 +107,30 @@ export default {
       }
 
       return filtered;
+    },
+    totalPages() {
+      return Math.ceil(this.filteredTasks.length / this.itemsPerPage);
+    },
+    paginatedTasks() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredTasks.slice(start, end);
+    },
+  },
+  methods: {
+    changePage(page) {
+      this.currentPage = page;
+    },
+    resetPagination() {
+      this.currentPage = 1;
+    },
+  },
+  watch: {
+    activeTab() {
+      this.resetPagination();
+    },
+    search() {
+      this.resetPagination();
     },
   },
 };

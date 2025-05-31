@@ -22,10 +22,24 @@
           :task="task"
           @toggle-completion="$emit('toggle-completion', $event)"
           @edit="$emit('edit', $event)"
-          @delete="$emit('delete', $event)"
-        />
+          @delete="$emit('delete', $event)"        />
       </template>
     </v-list>
+    
+    <!-- Pagination -->
+    <div v-if="tasks.length > 0 && totalPages > 1" class="d-flex justify-center align-center pa-4">
+      <v-pagination
+        v-model="localCurrentPage"
+        :length="totalPages"
+        :total-visible="5"
+        rounded
+      ></v-pagination>
+    </div>
+    
+    <!-- Task count information -->
+    <div v-if="tasks.length > 0" class="text-caption text-center mt-2 mb-4">
+      Showing {{ tasks.length }} of {{ totalItems }} tasks
+    </div>
   </div>
 </template>
 
@@ -36,8 +50,7 @@ export default {
   name: 'TaskList',
   components: {
     TaskItem
-  },
-  props: {
+  },  props: {
     tasks: {
       type: Array,
       required: true
@@ -45,9 +58,36 @@ export default {
     loading: {
       type: Boolean,
       default: false
+    },
+    totalItems: {
+      type: Number,
+      default: 0
+    },
+    currentPage: {
+      type: Number,
+      default: 1
+    },
+    totalPages: {
+      type: Number,
+      default: 1
     }
   },
-  emits: ['toggle-completion', 'edit', 'delete', 'new-task']
+  data() {
+    return {
+      localCurrentPage: this.currentPage
+    }
+  },
+  watch: {
+    currentPage(newValue) {
+      this.localCurrentPage = newValue;
+    },
+    localCurrentPage(newValue) {
+      if (newValue !== this.currentPage) {
+        this.$emit('change-page', newValue);
+      }
+    }
+  },
+  emits: ['toggle-completion', 'edit', 'delete', 'new-task', 'change-page']
 }
 </script>
 
