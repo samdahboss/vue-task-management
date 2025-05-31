@@ -52,17 +52,24 @@ export default {
       const options = { month: "short", day: "numeric" };
       return new Date(dateString).toLocaleDateString(undefined, options);
     },
-    
-    getStatus(task) {
+      getStatus(task) {
       if (task.completed) return "Completed";
+
+      // Format date as YYYY-MM-DD for consistent comparison
+      const getFormattedDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const dueDate = new Date(task.dueDate);
+      const dueDate = new Date(task.dueDate + 'T00:00:00');
 
       if (dueDate < today) return "Overdue";
 
-      const todayStr = today.toISOString().split("T")[0];
+      const todayStr = getFormattedDate(today);
       if (task.dueDate === todayStr) return "Today";
 
       return "Upcoming";
@@ -71,13 +78,21 @@ export default {
     getStatusColor(task) {
       if (task.completed) return "green";
 
+      // Format date as YYYY-MM-DD for consistent comparison
+      const getFormattedDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const dueDate = new Date(task.dueDate);
+      const dueDate = new Date(task.dueDate + 'T00:00:00');
 
       if (dueDate < today) return "red";
 
-      const todayStr = today.toISOString().split("T")[0];
+      const todayStr = getFormattedDate(today);
       if (task.dueDate === todayStr) return "amber-darken-2";
 
       return "blue";

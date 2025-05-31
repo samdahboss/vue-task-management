@@ -82,10 +82,10 @@ export default {
       try {
         const authStore = useAuthStore();
         const user = await authStore.login(this.user);
-        console.log("User logged in:", user);
-        // if (user) {
-        //   this.$router.push("/dashboard");
-        // }
+
+        if (user) {
+          this.$router.push("/dashboard");
+        }
       } catch (error) {
         this.error = error.message || "Login failed. Please try again.";
         console.error("Login error:", error.message);

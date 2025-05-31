@@ -24,8 +24,8 @@
     </v-row>
 
     <!-- Task List -->
-    <task-list 
-      :tasks="filteredTasks" 
+    <task-list
+      :tasks="filteredTasks"
       :loading="loading"
       @toggle-completion="$emit('toggle-completion', $event)"
       @edit="$emit('edit', $event)"
@@ -36,29 +36,29 @@
 </template>
 
 <script>
-import TaskList from './TaskList.vue';
+import TaskList from "./TaskList.vue";
 
 export default {
-  name: 'TasksView',
+  name: "TasksView",
   components: {
-    TaskList
+    TaskList,
   },
   props: {
     tasks: {
       type: Array,
-      required: true
+      required: true,
     },
     loading: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
-  emits: ['toggle-completion', 'edit', 'delete', 'new-task'],
+  emits: ["toggle-completion", "edit", "delete", "new-task"],
   data() {
     return {
-      activeTab: 'all',
-      search: ''
-    }
+      activeTab: "all",
+      search: "",
+    };
   },
   computed: {
     filteredTasks() {
@@ -68,13 +68,24 @@ export default {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
+      // Format date as YYYY-MM-DD for consistent comparison
+      const getFormattedDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+
+      const todayStr = getFormattedDate(today);
+
       if (this.activeTab === "today") {
-        const todayStr = today.toISOString().split("T")[0];
         filtered = filtered.filter((task) => task.dueDate === todayStr);
       } else if (this.activeTab === "upcoming") {
         filtered = filtered.filter((task) => {
-          const dueDate = new Date(task.dueDate);
-          return dueDate > today && !task.completed;
+          if (task.completed) return false;
+
+          const dueDate = new Date(task.dueDate + "T00:00:00");
+          return dueDate > today;
         });
       } else if (this.activeTab === "completed") {
         filtered = filtered.filter((task) => task.completed);
@@ -91,7 +102,7 @@ export default {
       }
 
       return filtered;
-    }
-  }
-}
+    },
+  },
+};
 </script>

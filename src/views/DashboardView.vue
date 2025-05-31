@@ -84,7 +84,8 @@ export default {
     TasksView,
     TaskDialog,
     AnalyticsView,
-  },  data() {
+  },
+  data() {
     return {
       mainTab: "tasks",
       taskDialog: false,
@@ -105,7 +106,7 @@ export default {
     tasks() {
       return this.taskStore.tasks;
     },
-    
+
     loading() {
       return this.taskStore.isLoading;
     },
@@ -132,14 +133,14 @@ export default {
     taskStore() {
       return useTaskStore();
     },
-  },  methods: {
+  },
+  methods: {
     async fetchTasks() {
       if (!this.user) {
         console.log("No user found, cannot fetch tasks");
         return;
       }
 
-      console.log("Fetching tasks for user:", this.user);
       try {
         // Use the task store to fetch tasks
         await this.taskStore.fetchTasksByUserId(this.user.id);
