@@ -62,7 +62,7 @@ export default {
       activeTab: "all",
       search: "",
       currentPage: 1,
-      itemsPerPage: 6,
+      itemsPerPage: 5,
     };
   },
   computed: {
