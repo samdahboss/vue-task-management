@@ -11,6 +11,11 @@ export default {
   // Fetch tasks by user ID
   async getTasksByUserId(userId) {
     const response = await fetch(`${API_URL}/tasks?userId=${userId}`);
+    if (!response.ok) {
+      throw new Error(
+        `Error fetching tasks for user ID ${userId}: ${response.statusText}`
+      );
+    }
     return response.json();
   },
   // Fetch a single task by ID

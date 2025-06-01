@@ -9,7 +9,7 @@ export default {
 
   // Fetch a single user by ID
   async getUser(id) {
-    const response = await fetch(`${API_URL}/users?id=${id}`);
+    const response = await fetch(`${API_URL}/users/${id}`);
     return response.json();
   },
 
