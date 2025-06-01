@@ -1,6 +1,9 @@
 <template>
   <v-app-bar color="green-darken-1" dark app>
-    <v-toolbar-title>Task Management</v-toolbar-title>
+    <router-link to="/" class="d-flex align-center text-decoration-none text-white pa-6">
+      <v-icon class="mr-2">mdi-check-circle</v-icon>
+      <v-toolbar-title>Taskr</v-toolbar-title>
+    </router-link>
     <v-spacer></v-spacer>
     <v-avatar size="40" class="mr-3">
       <v-img :src="'https://randomuser.me/api/portraits/men/83.jpg'" alt="Avatar"></v-img>

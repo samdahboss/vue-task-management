@@ -1,60 +1,73 @@
 <template>
-    <div>
-        <hero-section @scroll-to-features="scrollToFeatures" @signup="navigateToRegister" />
+  <v-layout>
+    <navbar @login="navigateToLogin" @signup="navigateToRegister" />
 
-        <stats-section :stats="landingData.stats" />
+    <v-main>
+      <hero-section @scroll-to-features="scrollToFeatures" @signup="navigateToRegister" />
 
-        <features-section :features="landingData.features" />
+      <stats-section :stats="landingData.stats" />
 
-        <how-it-works-section :steps="landingData.steps" />
+      <features-section id="features" :features="landingData.features" />
 
-        <testimonials-section :testimonial-slides="landingData.testimonialSlides" />
+      <how-it-works-section id="how-it-works" :steps="landingData.steps" />
 
-        <cta-section @signup="navigateToRegister" />
+      <testimonials-section
+        id="testimonials"
+        :testimonial-slides="landingData.testimonialSlides"
+      />
 
-        <app-footer :footer-links="landingData.footerLinks" />
-    </div>
+      <cta-section @signup="navigateToRegister" />
+
+      <app-footer :footer-links="landingData.footerLinks" />
+    </v-main>
+  </v-layout>
 </template>
 
 <script>
-import HeroSection from '@/components/landing/HeroSection.vue'
-import StatsSection from '@/components/landing/StatsSection.vue'
-import FeaturesSection from '@/components/landing/FeaturesSection.vue'
-import HowItWorksSection from '@/components/landing/HowItWorksSection.vue'
-import TestimonialsSection from '@/components/landing/TestimonialsSection.vue'
-import CtaSection from '@/components/landing/CtaSection.vue'
-import AppFooter from '@/components/landing/AppFooter.vue'
-import landingData from '@/assets/data/landingData'
+import HeroSection from "@/components/landing/HeroSection.vue";
+import StatsSection from "@/components/landing/StatsSection.vue";
+import FeaturesSection from "@/components/landing/FeaturesSection.vue";
+import HowItWorksSection from "@/components/landing/HowItWorksSection.vue";
+import TestimonialsSection from "@/components/landing/TestimonialsSection.vue";
+import CtaSection from "@/components/landing/CtaSection.vue";
+import AppFooter from "@/components/landing/AppFooter.vue";
+import landingData from "@/assets/data/landingData";
+import Navbar from "@/components/landing/Navbar.vue";
 
 export default {
-    name: 'LandingPage',
-    components: {
-        HeroSection,
-        StatsSection,
-        FeaturesSection,
-        HowItWorksSection,
-        TestimonialsSection,
-        CtaSection,
-        AppFooter
+  name: "LandingPage",
+  components: {
+    HeroSection,
+    StatsSection,
+    FeaturesSection,
+    HowItWorksSection,
+    TestimonialsSection,
+    CtaSection,
+    AppFooter,
+    Navbar,
+  },
+
+  data() {
+    return {
+      landingData,
+    };
+  },
+
+  methods: {
+    scrollToFeatures() {
+      const element = document.getElementById("features");
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
     },
 
-    data() {
-        return {
-            landingData
-        }
+    navigateToRegister() {
+      this.$router.push("/register");
     },
 
-    methods: {
-        scrollToFeatures() {
-            const element = document.getElementById('features');
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth' });
-            }
-        },
-
-        navigateToRegister() {
-            this.$router.push('/register');
-        }
-    }
-}
+    navigateToLogin() {
+      this.$router.push("/login");
+    },
+  },
+};
 </script>
